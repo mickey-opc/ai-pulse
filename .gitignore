@@ -1,0 +1,11 @@
+.next
+node_modules
+.env
+.env.local
+.env.production
+.vercel
+dist
+__pycache__
+*.pyc
+venv
+.pytest_cache
