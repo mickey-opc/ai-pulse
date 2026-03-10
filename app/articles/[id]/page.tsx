@@ -1,7 +1,7 @@
-import { notFound } from "next/navigation";
-import { headers } from "next/headers";
+import Link from "next/link";
+import { notFound, headers } from "next/headers";
+import { format } from "date-fns";
 import { fetchArticleById } from "@/lib/data";
-import ArticleDetailClient from "./ArticleDetailClient";
 
 export default async function ArticleDetailPage({ params }: { params: { id: string } }) {
   const article = await fetchArticleById(params.id);
@@ -13,9 +13,53 @@ export default async function ArticleDetailPage({ params }: { params: { id: stri
   // Get locale from cookie header
   const cookieHeader = headers().get("cookie") || "";
   const localeCookie = cookieHeader.split(";").find(c => c.trim().startsWith("locale="));
-  const initialLang = localeCookie ? localeCookie.split("=")[1] : "en";
+  const lang = (localeCookie ? localeCookie.split("=")[1] : "en") as "en" | "zh";
+  
+  const labels = lang === "zh" 
+    ? { published: "发布于", openOriginal: "查看原文", backToFeed: "返回列表" }
+    : { published: "Published", openOriginal: "Open original", backToFeed: "Back to feed" };
+
+  const title = lang === "zh" && article.title_zh ? article.title_zh : article.title;
+  const summary = lang === "zh" && article.summary_zh ? article.summary_zh : article.summary;
 
   return (
-    <ArticleDetailClient article={article} initialLang={initialLang} />
+    <main className="shell">
+      <button
+        onClick={() => {
+          const newLang = lang === "en" ? "zh" : "en";
+          document.cookie = `locale=${newLang}; path=/; max-age=31536000`;
+          window.location.reload();
+        }}
+        style={{
+          position: "absolute",
+          top: 16,
+          right: 16,
+          background: "#000",
+          color: "#fff",
+          border: "none",
+          padding: "6px 14px",
+          borderRadius: 4,
+          cursor: "pointer",
+          fontSize: 14,
+          zIndex: 50
+        }}
+      >
+        {lang === "en" ? "中文" : "EN"}
+      </button>
+      <div className="detail-card">
+        <span className="eyebrow">{article.source}</span>
+        <h1>{title}</h1>
+        <p className="meta">{labels.published} {format(new Date(article.publishedAt), "PPP p")}</p>
+        <p className="summary">{summary}</p>
+        <div className="link-row">
+          <a className="cta-button" href={article.url} target="_blank" rel="noreferrer">
+            {labels.openOriginal}
+          </a>
+          <Link className="ghost-link" href="/">
+            {labels.backToFeed}
+          </Link>
+        </div>
+      </div>
+    </main>
   );
 }
