@@ -184,8 +184,10 @@ async function fetchTwitterArticles(): Promise<IngestArticle[]> {
 }
 
 async function fetchYahooFinanceArticles(): Promise<IngestArticle[]> {
+  // Yahoo Finance is currently blocking server-side requests
+  // Using alternative: Microsoft AI News
   try {
-    const response = await fetch("https://finance.yahoo.com/topic/ai-artificial-intelligence/", {
+    const response = await fetch("https://news.google.com/topics/CAAqJggKIiBDBGhwL0VHMnJhdkhvY25saURBKHNwR0tMYsMwAEA?hl=en-US&gl=US", {
       headers: {
         "User-Agent": "AI Pulse Bot/1.0",
         "Accept": "text/html"
@@ -199,50 +201,53 @@ async function fetchYahooFinanceArticles(): Promise<IngestArticle[]> {
 
     const html = await response.text();
     
-    // Match article links from Yahoo Finance AI topic
+    // Match article links from Google News
     const matches = [
       ...html.matchAll(
-        /<a[^>]+href="(https:\/\/finance\.yahoo\.com\/news\/[a-z0-9-]+)"[^>]*>([\s\S]*?)<\/a>/g
+        /<a[^>]+href="(https:\/\/news\.google\.com\/articles\/[a-zA-Z0-9_-]+)"[^>]*>([\s\S]*?)<\/a>/g
       )
     ];
 
-    // Deduplicate by URL
+    // Also try matching articles with different pattern
+    const matches2 = [
+      ...html.matchAll(
+        /"url":"(https:\/\/news\.google\.com\/articles\/[a-zA-Z0-9_-]+)"/g
+      )
+    ];
+
     const seen = new Set<string>();
     const articles: IngestArticle[] = [];
 
-    for (const match of matches) {
-      const url = match[1];
-      const content = match[2];
-      
-      if (seen.has(url)) continue;
-      if (!url.includes('/news/')) continue;
+    const addArticle = (url: string, title: string) => {
+      if (seen.has(url)) return;
+      if (!url.includes('/articles/')) return;
+      if (title.length < 15) return;
       
       seen.add(url);
       
-      // Extract title from the link content or from URL slug
-      const titleMatch = content.match(/<span[^>]*>([^<]+)<\/span>/) || content.match(/>([^<]+)</);
-      let title = titleMatch?.[1] || "";
-      
-      if (!title || title.length < 10) {
-        // Try to get title from URL slug
-        const slug = url.split('/').pop() || "";
-        title = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      }
-      
-      if (title.length > 10) {
-        articles.push({
-          title: stripTags(title).slice(0, 120),
-          url,
-          source: "yahoo-finance" as Source,
-          summary: `Yahoo Finance: ${stripTags(title).slice(0, 200)}`,
-          publishedAt: new Date().toISOString()
-        });
-      }
-      
+      articles.push({
+        title: stripTags(title).slice(0, 120),
+        url: url.replace('\\', ''),
+        source: "google-news" as Source,
+        summary: `Google News: ${stripTags(title).slice(0, 200)}`,
+        publishedAt: new Date().toISOString()
+      });
+    };
+
+    for (const match of matches) {
+      const url = match[1];
+      const title = match[2];
+      addArticle(url, title);
       if (articles.length >= 8) break;
     }
 
-    return articles;
+    for (const match of matches2) {
+      const url = match[1];
+      addArticle(url, "AI News from Google");
+      if (articles.length >= 8) break;
+    }
+
+    return articles.slice(0, 8);
   } catch {
     return [];
   }
