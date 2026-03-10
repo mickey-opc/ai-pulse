@@ -98,7 +98,7 @@ export default function HomeClient({ articles, sourceCount, initialLang }: { art
   }, []);
 
   const t = (key: keyof typeof translations.en): string => {
-    return translations[language][key] || key;
+    return translations[language as keyof typeof translations][key] || key;
   };
 
   const getTitle = (article: Article) => {
