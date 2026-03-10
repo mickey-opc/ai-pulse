@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { formatDistanceToNowStrict } from "date-fns";
 import { fetchArticles } from "@/lib/data";
+import { SubscribeForm } from "@/components/subscribe-form";
 import type { Article } from "@/lib/types";
 
 export const revalidate = 300;
@@ -13,6 +14,7 @@ const translations = {
     latestArticles: "Latest articles",
     activeSources: "Active sources",
     emailBrief: "Email brief",
+    emailDescription: "Subscribe for a daily digest while the crawler refreshes the database every five hours.",
     latestSignal: "Latest signal",
     filterDescription: "Sorted by publish time. Filter by source without leaving the page.",
     allSources: "All sources",
@@ -24,6 +26,7 @@ const translations = {
     latestArticles: "最新文章",
     activeSources: "活跃来源",
     emailBrief: "邮件简报",
+    emailDescription: "订阅每日简报，爬虫每5小时刷新数据库",
     latestSignal: "最新资讯",
     filterDescription: "按发布时间排序，可按来源筛选",
     allSources: "全部来源",
@@ -95,6 +98,11 @@ export default async function HomePage({
               </div>
             </div>
           </div>
+          <aside className="hero-card aside-card">
+            <h2>{t.emailBrief}</h2>
+            <p>{t.emailDescription}</p>
+            <SubscribeForm />
+          </aside>
         </section>
 
         <section className="panel" style={{ padding: 24 }}>
