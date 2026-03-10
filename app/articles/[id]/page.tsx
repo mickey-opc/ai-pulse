@@ -18,9 +18,9 @@ export default async function ArticleDetailPage({ params }: { params: { id: stri
         <p className="meta">Published {format(new Date(article.publishedAt), "PPP p")}</p>
         <p className="summary">{article.summary}</p>
         <div className="link-row">
-          <Link className="cta-button" href={article.url} target="_blank" rel="noreferrer">
+          <a className="cta-button" href={article.url} target="_blank" rel="noreferrer">
             Open original
-          </Link>
+          </a>
           <Link className="ghost-link" href="/">
             Back to feed
           </Link>

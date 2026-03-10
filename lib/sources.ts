@@ -18,7 +18,7 @@ function titleFromSlug(slug: string) {
     .join(" ");
 }
 
-function extractRssItems(xml: string, source: Source) {
+function extractRssItems(xml: string, source: Source): IngestArticle[] {
   const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
   return items.slice(0, 8).map((match) => {
     const block = match[1];
@@ -53,7 +53,7 @@ const feeds: FeedDefinition[] = [
   },
 ];
 
-async function fetchAnthropicArticles() {
+async function fetchAnthropicArticles(): Promise<IngestArticle[]> {
   const response = await fetch("https://www.anthropic.com/news", {
     headers: {
       "User-Agent": "AI Pulse Bot/1.0"
@@ -101,7 +101,7 @@ async function fetchAnthropicArticles() {
         return {
           title: stripTags(title),
           url: articleUrl,
-          source: "anthropic" as const,
+          source: "anthropic" as Source,
           summary: stripTags(summary).slice(0, 280),
           publishedAt: new Date(publishedAt).toISOString()
         };
@@ -114,7 +114,7 @@ async function fetchAnthropicArticles() {
   return items.filter((item): item is IngestArticle => item !== null);
 }
 
-async function fetchWaytoagiArticles() {
+async function fetchWaytoagiArticles(): Promise<IngestArticle[]> {
   const response = await fetch("https://www.waytoagi.com", {
     headers: {
       "User-Agent": "AI Pulse Bot/1.0"
@@ -143,15 +143,16 @@ async function fetchWaytoagiArticles() {
     return {
       title: summary.split(/\s{2,}| {2,}/)[0].slice(0, 120) || `WaytoAGI update ${dateCode}`,
       url,
-      source: "waytoagi" as const,
+      source: "waytoagi" as Source,
       summary: summary.slice(0, 280),
       publishedAt: new Date(`${year}-${month}-${day}T08:00:00.000Z`).toISOString()
     };
   });
 }
 
-async function fetchTwitterArticles() {
-  const urls = env.TWITTER_RSS_URLS.split(",")
+async function fetchTwitterArticles(): Promise<IngestArticle[]> {
+  const twitterUrls = env.TWITTER_RSS_URLS || "";
+  const urls = twitterUrls.split(",")
     .map((value) => value.trim())
     .filter(Boolean);
 

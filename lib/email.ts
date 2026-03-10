@@ -1,4 +1,4 @@
-import { Resend } from "@resend/node";
+import { Resend } from "resend";
 import type { Article } from "@/lib/types";
 import { env } from "@/lib/env";
 
