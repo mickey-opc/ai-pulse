@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { notFound, headers } from "next/headers";
+import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { format } from "date-fns";
 import { fetchArticleById } from "@/lib/data";
 
