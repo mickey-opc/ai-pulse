@@ -117,7 +117,7 @@ export default async function HomePage({
               <Link className="ghost-link" href="/?source=waytoagi">waytoagi</Link>
               <Link className="ghost-link" href="/?source=openai">OpenAI</Link>
               <Link className="ghost-link" href="/?source=anthropic">Anthropic</Link>
-              <Link className="ghost-link" href="/?source=mit-tech-review">MIT Tech Review</Link>
+              <Link className="ghost-link" href="/?source=techcrunch">TechCrunch</Link>
             </div>
           </div>
           <div className="articles-grid">

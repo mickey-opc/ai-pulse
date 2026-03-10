@@ -184,9 +184,9 @@ async function fetchTwitterArticles(): Promise<IngestArticle[]> {
 }
 
 async function fetchYahooFinanceArticles(): Promise<IngestArticle[]> {
-  // Yahoo Finance requires JavaScript rendering - use MIT Technology Review AI instead
+  // Use TechCrunch AI RSS instead
   try {
-    const response = await fetch("https://www.technologyreview.com/feed/topic/artificial-intelligence/", {
+    const response = await fetch("https://techcrunch.com/category/artificial-intelligence/feed/", {
       headers: {
         "User-Agent": "AI Pulse Bot/1.0",
         "Accept": "application/rss+xml, application/xml, text/xml"
@@ -214,7 +214,7 @@ async function fetchYahooFinanceArticles(): Promise<IngestArticle[]> {
       return {
         title: stripTags(title),
         url: url.trim(),
-        source: "mit-tech-review" as Source,
+        source: "techcrunch" as Source,
         summary: stripTags(summary).slice(0, 280),
         publishedAt: new Date().toISOString()
       };

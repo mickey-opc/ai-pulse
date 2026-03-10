@@ -1,4 +1,4 @@
-export type Source = "twitter" | "waytoagi" | "openai" | "anthropic" | "mit-tech-review";
+export type Source = "twitter" | "waytoagi" | "openai" | "anthropic" | "techcrunch";
 
 export type Article = {
   id: string;
