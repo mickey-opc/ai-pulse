@@ -1,0 +1,26 @@
+{
+  "HomePage": {
+    "title": "AI Pulse",
+    "subtitle": "全球AI资讯",
+    "heroTitle": "每五小时追踪AI动态",
+    "heroDescription": "AI Pulse 聚合了来自 X/Twitter、waytoagi、OpenAI 和 Anthropic 的最新资讯，为创业者、研究者和从业者打造快速信息流。",
+    "latestArticles": "最新文章",
+    "activeSources": "活跃来源",
+    "emailBrief": "邮件简报",
+    "emailDescription": "订阅每日简报，爬虫每5小时更新数据库。",
+    "latestSignal": "最新资讯",
+    "filterDescription": "按发布时间排序，可按来源筛选。",
+    "allSources": "全部来源",
+    "noArticles": "暂无文章，请运行爬虫获取内容。",
+    "footerNote": "定时任务：每5小时抓取，每天08:00 UTC发送邮件。"
+  },
+  "ArticleDetail": {
+    "published": "发布于",
+    "openOriginal": "查看原文",
+    "backToFeed": "返回列表"
+  },
+  "LanguageSwitcher": {
+    "switchToChinese": "中文",
+    "switchToEnglish": "EN"
+  }
+}

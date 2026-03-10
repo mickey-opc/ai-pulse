@@ -3,9 +3,11 @@ export type Source = "twitter" | "waytoagi" | "openai" | "anthropic";
 export type Article = {
   id: string;
   title: string;
+  title_zh?: string;
   url: string;
   source: Source;
   summary: string;
+  summary_zh?: string;
   publishedAt: string;
   createdAt: string;
 };
