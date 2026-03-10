@@ -25,28 +25,28 @@ export default async function ArticleDetailPage({ params }: { params: { id: stri
 
   return (
     <main className="shell">
-      <button
-        onClick={() => {
-          const newLang = lang === "en" ? "zh" : "en";
-          document.cookie = `locale=${newLang}; path=/; max-age=31536000`;
-          window.location.reload();
-        }}
-        style={{
-          position: "absolute",
-          top: 16,
-          right: 16,
-          background: "#000",
-          color: "#fff",
-          border: "none",
-          padding: "6px 14px",
-          borderRadius: 4,
-          cursor: "pointer",
-          fontSize: 14,
-          zIndex: 50
-        }}
-      >
-        {lang === "en" ? "中文" : "EN"}
-      </button>
+      <form action="/api/set-locale" method="POST">
+        <input type="hidden" name="locale" value={lang === "en" ? "zh" : "en"} />
+        <button
+          type="submit"
+          style={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            background: "linear-gradient(135deg, var(--accent), var(--accent-secondary))",
+            color: "#fff",
+            border: "none",
+            padding: "8px 16px",
+            borderRadius: 8,
+            cursor: "pointer",
+            fontSize: 14,
+            fontWeight: 600,
+            zIndex: 50
+          }}
+        >
+          {lang === "en" ? "中文" : "EN"}
+        </button>
+      </form>
       <div className="detail-card">
         <span className="eyebrow">{article.source}</span>
         <h1>{title}</h1>
