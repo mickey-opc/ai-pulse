@@ -8,8 +8,14 @@ export default createMiddleware({
   // Used when no locale matches
   defaultLocale: 'en',
   
-  // Cookie name to use for locale
-  localeCookieName: 'locale'
+  localeCookie: {
+    name: 'locale',
+    options: {
+      path: '/',
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production'
+    }
+  }
 });
 
 export const config = {
