@@ -184,12 +184,10 @@ async function fetchTwitterArticles(): Promise<IngestArticle[]> {
 }
 
 async function fetchYahooFinanceArticles(): Promise<IngestArticle[]> {
-  // Yahoo Finance is currently blocking server-side requests
-  // Using alternative: Microsoft AI News
   try {
-    const response = await fetch("https://news.google.com/topics/CAAqJggKIiBDBGhwL0VHMnJhdkhvY25saURBKHNwR0tMYsMwAEA?hl=en-US&gl=US", {
+    const response = await fetch("https://finance.yahoo.com/news/", {
       headers: {
-        "User-Agent": "AI Pulse Bot/1.0",
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1",
         "Accept": "text/html"
       },
       next: { revalidate: 0 }
@@ -201,53 +199,48 @@ async function fetchYahooFinanceArticles(): Promise<IngestArticle[]> {
 
     const html = await response.text();
     
-    // Match article links from Google News
+    // Match article links from Yahoo Finance
     const matches = [
       ...html.matchAll(
-        /<a[^>]+href="(https:\/\/news\.google\.com\/articles\/[a-zA-Z0-9_-]+)"[^>]*>([\s\S]*?)<\/a>/g
-      )
-    ];
-
-    // Also try matching articles with different pattern
-    const matches2 = [
-      ...html.matchAll(
-        /"url":"(https:\/\/news\.google\.com\/articles\/[a-zA-Z0-9_-]+)"/g
+        /<a[^>]+href="(https:\/\/finance\.yahoo\.com\/news\/[a-z0-9-]+)"[^>]*>([\s\S]*?)<\/a>/g
       )
     ];
 
     const seen = new Set<string>();
     const articles: IngestArticle[] = [];
 
-    const addArticle = (url: string, title: string) => {
-      if (seen.has(url)) return;
-      if (!url.includes('/articles/')) return;
-      if (title.length < 15) return;
+    for (const match of matches) {
+      const url = match[1];
+      const content = match[2];
+      
+      if (seen.has(url)) continue;
+      if (!url.includes('/news/')) continue;
       
       seen.add(url);
       
-      articles.push({
-        title: stripTags(title).slice(0, 120),
-        url: url.replace('\\', ''),
-        source: "google-news" as Source,
-        summary: `Google News: ${stripTags(title).slice(0, 200)}`,
-        publishedAt: new Date().toISOString()
-      });
-    };
-
-    for (const match of matches) {
-      const url = match[1];
-      const title = match[2];
-      addArticle(url, title);
+      // Extract title from the link content
+      const titleMatch = content.match(/<span[^>]*>([^<]+)<\/span>/) || content.match(/>([^<]+)</);
+      let title = titleMatch?.[1] || "";
+      
+      if (!title || title.length < 10) {
+        const slug = url.split('/').pop() || "";
+        title = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      }
+      
+      if (title.length > 10) {
+        articles.push({
+          title: stripTags(title).slice(0, 120),
+          url,
+          source: "yahoo-finance" as Source,
+          summary: `Yahoo Finance: ${stripTags(title).slice(0, 200)}`,
+          publishedAt: new Date().toISOString()
+        });
+      }
+      
       if (articles.length >= 8) break;
     }
 
-    for (const match of matches2) {
-      const url = match[1];
-      addArticle(url, "AI News from Google");
-      if (articles.length >= 8) break;
-    }
-
-    return articles.slice(0, 8);
+    return articles;
   } catch {
     return [];
   }
