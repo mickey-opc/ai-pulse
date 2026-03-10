@@ -183,6 +183,71 @@ async function fetchTwitterArticles(): Promise<IngestArticle[]> {
   return [];
 }
 
+async function fetchYahooFinanceArticles(): Promise<IngestArticle[]> {
+  try {
+    const response = await fetch("https://finance.yahoo.com/topic/ai-artificial-intelligence/", {
+      headers: {
+        "User-Agent": "AI Pulse Bot/1.0",
+        "Accept": "text/html"
+      },
+      next: { revalidate: 0 }
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const html = await response.text();
+    
+    // Match article links from Yahoo Finance AI topic
+    const matches = [
+      ...html.matchAll(
+        /<a[^>]+href="(https:\/\/finance\.yahoo\.com\/news\/[a-z0-9-]+)"[^>]*>([\s\S]*?)<\/a>/g
+      )
+    ];
+
+    // Deduplicate by URL
+    const seen = new Set<string>();
+    const articles: IngestArticle[] = [];
+
+    for (const match of matches) {
+      const url = match[1];
+      const content = match[2];
+      
+      if (seen.has(url)) continue;
+      if (!url.includes('/news/')) continue;
+      
+      seen.add(url);
+      
+      // Extract title from the link content or from URL slug
+      const titleMatch = content.match(/<span[^>]*>([^<]+)<\/span>/) || content.match(/>([^<]+)</);
+      let title = titleMatch?.[1] || "";
+      
+      if (!title || title.length < 10) {
+        // Try to get title from URL slug
+        const slug = url.split('/').pop() || "";
+        title = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      }
+      
+      if (title.length > 10) {
+        articles.push({
+          title: stripTags(title).slice(0, 120),
+          url,
+          source: "yahoo-finance" as Source,
+          summary: `Yahoo Finance: ${stripTags(title).slice(0, 200)}`,
+          publishedAt: new Date().toISOString()
+        });
+      }
+      
+      if (articles.length >= 8) break;
+    }
+
+    return articles;
+  } catch {
+    return [];
+  }
+}
+
 export async function fetchAllSources(): Promise<IngestArticle[]> {
   const rssResults = await Promise.all(
     feeds.map(async (feed) => {
@@ -206,11 +271,12 @@ export async function fetchAllSources(): Promise<IngestArticle[]> {
     })
   );
 
-  const [anthropicArticles, waytoagiArticles, twitterArticles] = await Promise.all([
+  const [anthropicArticles, waytoagiArticles, twitterArticles, yahooFinanceArticles] = await Promise.all([
     fetchAnthropicArticles(),
     fetchWaytoagiArticles(),
-    fetchTwitterArticles()
+    fetchTwitterArticles(),
+    fetchYahooFinanceArticles()
   ]);
 
-  return [...rssResults.flat(), ...anthropicArticles, ...waytoagiArticles, ...twitterArticles];
+  return [...rssResults.flat(), ...anthropicArticles, ...waytoagiArticles, ...twitterArticles, ...yahooFinanceArticles];
 }
