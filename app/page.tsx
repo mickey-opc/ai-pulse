@@ -1,8 +1,4 @@
-import Link from "next/link";
-import { ArticleGrid } from "@/components/article-grid";
-import { SubscribeForm } from "@/components/subscribe-form";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { LanguageProvider } from "@/components/LanguageProvider";
+import { headers } from "next/headers";
 import { fetchArticles } from "@/lib/data";
 import HomeClient from "./HomeClient";
 
@@ -17,12 +13,16 @@ export default async function HomePage({
   const articles = await fetchArticles(selectedSource);
   const sourceCount = new Set(articles.map((article) => article.source)).size;
 
+  // Get initial locale from cookie header
+  const cookieHeader = headers().get("cookie") || "";
+  const localeCookie = cookieHeader.split(";").find(c => c.trim().startsWith("locale="));
+  const initialLang = localeCookie ? localeCookie.split("=")[1] : "en";
+
   return (
-    <LanguageProvider>
-      <HomeClient 
-        articles={articles} 
-        sourceCount={sourceCount} 
-      />
-    </LanguageProvider>
+    <HomeClient 
+      articles={articles} 
+      sourceCount={sourceCount}
+      initialLang={initialLang}
+    />
   );
 }
