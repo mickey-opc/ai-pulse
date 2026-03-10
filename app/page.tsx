@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { headers } from "next/headers";
+import { cookies } from "next/headers";
 import { formatDistanceToNowStrict } from "date-fns";
 import { fetchArticles } from "@/lib/data";
 import type { Article } from "@/lib/types";
@@ -13,7 +13,6 @@ const translations = {
     latestArticles: "Latest articles",
     activeSources: "Active sources",
     emailBrief: "Email brief",
-    emailDescription: "Subscribe for a daily digest while the crawler refreshes the database every five hours.",
     latestSignal: "Latest signal",
     filterDescription: "Sorted by publish time. Filter by source without leaving the page.",
     allSources: "All sources",
@@ -25,42 +24,12 @@ const translations = {
     latestArticles: "最新文章",
     activeSources: "活跃来源",
     emailBrief: "邮件简报",
-    emailDescription: "订阅每日简报，爬虫每5小时刷新数据库",
     latestSignal: "最新资讯",
     filterDescription: "按发布时间排序，可按来源筛选",
     allSources: "全部来源",
     footerNote: "爬虫：每5小时抓取，邮件简报：每天 08:00 UTC",
   }
 };
-
-function LanguageSwitcher({ lang }: { lang: string }) {
-  const newLang = lang === "en" ? "zh" : "en";
-  const label = lang === "en" ? "中文" : "EN";
-  
-  return (
-    <button
-      onClick={() => {
-        document.cookie = `locale=${newLang}; path=/; max-age=31536000`;
-        window.location.reload();
-      }}
-      style={{
-        position: "absolute",
-        top: 16,
-        right: 16,
-        background: "#000",
-        color: "#fff",
-        border: "none",
-        padding: "6px 14px",
-        borderRadius: 4,
-        cursor: "pointer",
-        fontSize: 14,
-        zIndex: 50
-      }}
-    >
-      {label}
-    </button>
-  );
-}
 
 export default async function HomePage({
   searchParams
@@ -71,10 +40,10 @@ export default async function HomePage({
   const articles = await fetchArticles(selectedSource);
   const sourceCount = new Set(articles.map((article) => article.source)).size;
 
-  // Get locale from cookie header
-  const cookieHeader = headers().get("cookie") || "";
-  const localeCookie = cookieHeader.split(";").find(c => c.trim().startsWith("locale="));
-  const lang = (localeCookie ? localeCookie.split("=")[1] : "en") as "en" | "zh";
+  // Get locale from cookie
+  const cookieStore = cookies();
+  const localeCookie = cookieStore.get("locale");
+  const lang = (localeCookie?.value || "en") as "en" | "zh";
   
   const t = translations[lang];
   
@@ -88,7 +57,27 @@ export default async function HomePage({
 
   return (
     <main className="shell">
-      <LanguageSwitcher lang={lang} />
+      <form action="/api/set-locale" method="POST">
+        <input type="hidden" name="locale" value={lang === "en" ? "zh" : "en"} />
+        <button
+          type="submit"
+          style={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            background: "#000",
+            color: "#fff",
+            border: "none",
+            padding: "6px 14px",
+            borderRadius: 4,
+            cursor: "pointer",
+            fontSize: 14,
+            zIndex: 50
+          }}
+        >
+          {lang === "en" ? "中文" : "EN"}
+        </button>
+      </form>
       <div className="frame">
         <section className="hero">
           <div className="hero-card">
