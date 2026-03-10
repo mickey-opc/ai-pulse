@@ -1,7 +1,5 @@
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
-import { cookies } from "next/headers";
 import "./globals.css";
+import { LanguageProvider } from "@/components/LanguageProvider";
 
 import type { Metadata } from "next";
 
@@ -15,16 +13,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const locale = cookieStore.get("locale")?.value || "en";
-  const messages = await getMessages();
-
   return (
-    <html lang={locale}>
+    <html lang="en">
       <body>
-        <NextIntlClientProvider messages={messages}>
+        <LanguageProvider>
           {children}
-        </NextIntlClientProvider>
+        </LanguageProvider>
       </body>
     </html>
   );
