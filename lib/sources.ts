@@ -184,11 +184,12 @@ async function fetchTwitterArticles(): Promise<IngestArticle[]> {
 }
 
 async function fetchYahooFinanceArticles(): Promise<IngestArticle[]> {
+  // Yahoo Finance requires JavaScript rendering - use MIT Technology Review AI instead
   try {
-    const response = await fetch("https://finance.yahoo.com/news/", {
+    const response = await fetch("https://www.technologyreview.com/feed/topic/artificial-intelligence/", {
       headers: {
-        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1",
-        "Accept": "text/html"
+        "User-Agent": "AI Pulse Bot/1.0",
+        "Accept": "application/rss+xml, application/xml, text/xml"
       },
       next: { revalidate: 0 }
     });
@@ -197,50 +198,27 @@ async function fetchYahooFinanceArticles(): Promise<IngestArticle[]> {
       return [];
     }
 
-    const html = await response.text();
+    const xml = await response.text();
     
-    // Match article links from Yahoo Finance
-    const matches = [
-      ...html.matchAll(
-        /<a[^>]+href="(https:\/\/finance\.yahoo\.com\/news\/[a-z0-9-]+)"[^>]*>([\s\S]*?)<\/a>/g
-      )
-    ];
+    // Parse RSS/Atom feed
+    const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 8);
+    
+    return items.map((match) => {
+      const block = match[1];
+      const title = block.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/)?.[1] ??
+        block.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/)?.[2] ?? "Untitled";
+      const url = block.match(/<link>(.*?)<\/link>/)?.[1] ?? "";
+      const summary = block.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>|<description>(.*?)<\/description>/)?.[1] ??
+        block.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>|<description>(.*?)<\/description>/)?.[2] ?? "";
 
-    const seen = new Set<string>();
-    const articles: IngestArticle[] = [];
-
-    for (const match of matches) {
-      const url = match[1];
-      const content = match[2];
-      
-      if (seen.has(url)) continue;
-      if (!url.includes('/news/')) continue;
-      
-      seen.add(url);
-      
-      // Extract title from the link content
-      const titleMatch = content.match(/<span[^>]*>([^<]+)<\/span>/) || content.match(/>([^<]+)</);
-      let title = titleMatch?.[1] || "";
-      
-      if (!title || title.length < 10) {
-        const slug = url.split('/').pop() || "";
-        title = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      }
-      
-      if (title.length > 10) {
-        articles.push({
-          title: stripTags(title).slice(0, 120),
-          url,
-          source: "yahoo-finance" as Source,
-          summary: `Yahoo Finance: ${stripTags(title).slice(0, 200)}`,
-          publishedAt: new Date().toISOString()
-        });
-      }
-      
-      if (articles.length >= 8) break;
-    }
-
-    return articles;
+      return {
+        title: stripTags(title),
+        url: url.trim(),
+        source: "mit-tech-review" as Source,
+        summary: stripTags(summary).slice(0, 280),
+        publishedAt: new Date().toISOString()
+      };
+    });
   } catch {
     return [];
   }
