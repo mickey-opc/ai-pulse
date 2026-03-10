@@ -1,5 +1,4 @@
 import "./globals.css";
-import { LanguageProvider } from "@/components/LanguageProvider";
 
 import type { Metadata } from "next";
 
@@ -16,9 +15,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        <LanguageProvider>
-          {children}
-        </LanguageProvider>
+        {children}
       </body>
     </html>
   );
