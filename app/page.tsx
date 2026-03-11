@@ -14,11 +14,11 @@ const translations = {
     latestArticles: "Latest articles",
     activeSources: "Active sources",
     emailBrief: "Email brief",
-    emailDescription: "Subscribe for new-article email updates every five minutes while the crawler refreshes the database every five hours.",
+    emailDescription: "Subscribe for new-article email updates every hour while the crawler refreshes the database every five hours.",
     latestSignal: "Latest signal",
     filterDescription: "Sorted by publish time. Filter by source without leaving the page.",
     allSources: "All sources",
-    footerNote: "Cron schedule: fetch every 5 hours, email notifications every 5 minutes.",
+    footerNote: "Cron schedule: fetch every 5 hours, email notifications every hour.",
   },
   zh: {
     heroTitle: "每五小时追踪AI动态",
@@ -26,11 +26,11 @@ const translations = {
     latestArticles: "最新文章",
     activeSources: "活跃来源",
     emailBrief: "邮件简报",
-    emailDescription: "订阅每5分钟发送的新文章邮件提醒，爬虫每5小时刷新数据库",
+    emailDescription: "订阅每1小时发送的新文章邮件提醒，爬虫每5小时刷新数据库",
     latestSignal: "最新资讯",
     filterDescription: "按发布时间排序，可按来源筛选",
     allSources: "全部来源",
-    footerNote: "爬虫：每5小时抓取，邮件提醒：每5分钟运行一次",
+    footerNote: "爬虫：每5小时抓取，邮件提醒：每1小时运行一次",
   }
 };
 
