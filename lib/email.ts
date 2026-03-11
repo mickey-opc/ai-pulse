@@ -12,7 +12,7 @@ function buildDigestHtml(articles: Article[]) {
     )
     .join("");
 
-  return `<h1>AI Pulse Digest</h1><p>Latest AI updates from the last 24 hours.</p><ul>${items}</ul>`;
+  return `<h1>AI Pulse Updates</h1><p>Fresh AI updates discovered in the last 24 hours.</p><ul>${items}</ul>`;
 }
 
 export async function sendDigestEmail(to: string[], articles: Article[]) {
@@ -23,7 +23,7 @@ export async function sendDigestEmail(to: string[], articles: Article[]) {
   return resend.emails.send({
     from: env.RESEND_AUDIENCE_FROM,
     to,
-    subject: `AI Pulse digest: ${articles.length} updates`,
+    subject: `AI Pulse update: ${articles.length} new article${articles.length === 1 ? "" : "s"}`,
     html: buildDigestHtml(articles)
   });
 }

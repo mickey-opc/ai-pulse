@@ -5,7 +5,17 @@
 1. Vercel Cron hits `/api/cron/fetch` every 5 hours.
 2. The route fetches source feeds and upserts them into PostgreSQL.
 3. Homepage reads the latest records from PostgreSQL.
-4. `/api/cron/send` builds a 24-hour digest and sends it to subscribers via Resend.
+4. `/api/cron/send` checks for unsent articles from the last 24 hours and emails each subscriber at most once per article via Resend.
+
+## Schedules
+
+- `/api/cron/fetch`: every 5 hours
+- `/api/cron/send`: every 5 minutes
+
+## Delivery Safety
+
+- `email_deliveries` stores which subscriber already received which article.
+- The send cron uses a PostgreSQL advisory lock to avoid overlapping runs.
 
 ## Sources
 
