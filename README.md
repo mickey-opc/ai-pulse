@@ -6,7 +6,7 @@ AI Pulse 是一个面向全球用户的 AI 新闻聚合平台，聚合 Twitter/X
 
 - 多来源新闻聚合
 - PostgreSQL 持久化
-- 邮箱订阅（每 1 小时发送新文章提醒）
+- 邮箱订阅（每天发送新文章提醒）
 - Vercel Cron 定时抓取与推送
 - Python 抓取器
 

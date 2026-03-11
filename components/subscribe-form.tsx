@@ -23,7 +23,7 @@ export function SubscribeForm() {
     const payload = (await response.json()) as { error?: string };
 
     setPending(false);
-    setMessage(response.ok ? "Subscribed. Near-real-time email updates enabled." : payload.error ?? "Request failed");
+    setMessage(response.ok ? "Subscribed. Daily email updates enabled." : payload.error ?? "Request failed");
 
     if (response.ok) {
       setEmail("");

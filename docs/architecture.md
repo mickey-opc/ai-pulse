@@ -10,7 +10,7 @@
 ## Schedules
 
 - `/api/cron/fetch`: every day
-- `/api/cron/send`: every hour
+- `/api/cron/send`: every day
 
 ## Delivery Safety
 
